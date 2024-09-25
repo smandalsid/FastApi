@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, status, Path, APIRouter
-from models import Users
-from database import sessionLocal
+from ..models import Users
+from ..database import sessionLocal
 from typing import Annotated
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
