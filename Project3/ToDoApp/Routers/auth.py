@@ -1,5 +1,5 @@
 from datetime import timedelta, datetime, timezone
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Request
 from pydantic import BaseModel
 from ..models import Users
 from passlib.context import CryptContext
@@ -8,6 +8,7 @@ from typing import Annotated
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
+from fastapi.templating import Jinja2Templates
 
 router=APIRouter(
     prefix='/auth',
@@ -41,6 +42,20 @@ class CreateUserRequest(BaseModel):
 class Token(BaseModel):
     access_token:str
     token_type:str
+
+templates=Jinja2Templates(directory="ToDoApp/templates")
+
+### PAGES
+
+@router.get("/login-page")
+def render_login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request":request})
+
+@router.get("/register-page")
+def render_register_page(request: Request):
+    return templates.TemplateResponse("register.html", {"request":request})
+
+### ENDPOINTS
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user_request : CreateUserRequest):
