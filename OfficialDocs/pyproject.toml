@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "officialdocs"
+version = "0.1.0"
+description = "Applying learnings from official fastapi documentation."
+authors = ["smandalsid <smandal.sid@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = {extras = ["standard"], version = "^0.115.2"}
+uvicorn = {extras = ["standard"], version = "^0.31.1"}
+python-multipart = "^0.0.17"
+pyjwt = "^2.10.1"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
