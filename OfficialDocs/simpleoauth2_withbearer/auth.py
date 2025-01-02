@@ -9,7 +9,8 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
 
-SECRET_KEY = "b03f2cb916424a7e375134d639296d24126b24e4e07eda8cfe3e34fd50ee5525"
+SECRET_KEY = ""
+# generate a key using openssl
 ALGORITHM = "HS256"
 
 def fake_hash_password(password: str):
