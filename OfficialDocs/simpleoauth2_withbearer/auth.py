@@ -13,9 +13,6 @@ SECRET_KEY = ""
 # generate a key using openssl
 ALGORITHM = "HS256"
 
-def fake_hash_password(password: str):
-    return "fakehashed" + password
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes = ["bcrypt"], deprecated="auto")
 
