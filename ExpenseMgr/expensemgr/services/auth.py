@@ -1,20 +1,43 @@
 from datetime import timedelta, datetime, timezone
-from fastapi import APIRouter, Depends, status, HTTPException, Request
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from passlib.context import CryptContext
-from dotenv import load_dotenv
-import os
+from fastapi import Depends, status, HTTPException, Request
+from jose import jwt
+from typing import Annotated
 
 from ..database.models.users import User
 from ..database.db import db_dependency
-from ..schemas.users import CreateUser
+from .utils import SECRET_KEY, ALGORITHM
 
-load_dotenv()
+from .utils import bcrypt_context, oath2_bearer
 
+class AuthService:
 
+    def __init__(self, db: db_dependency):
+        self.db = db
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
+    def authenticate_user(self, username: str, password: str):
+        user = self.db.query(User).filter(User.username == username).first()
+        if not user:
+            return False
+        if not bcrypt_context.verify(password, user.password):
+            return False
+        return user
 
-bcrypt_context = CryptContext(schemes=["brcypt"], deprecated='auto')
-oath2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
+    def create_access_token(self, username: str, user_id: int, is_admin: bool, expires_delta: timedelta):
+        encode = {'sub': username, 'id': user_id, 'is_admin': is_admin}
+        expires = datetime.now(timezone.utc) + expires_delta
+        encode.update({'exp': expires})
+        return jwt.encode(encode, SECRET_KEY, algorithm = ALGORITHM)
+
+    async def get_current_user(self, token: Annotated[str, Depends(oath2_bearer)]):
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            username: str = payload.get('sub')
+            user_id: int = payload.get('id')
+            is_admin: str = payload.get('is_admin')
+            if username is None or user_id is None:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail = "Could not validate credentials")
+            else:
+                return {'username': username, 'id': user_id, 'is_admin': is_admin}
+        except:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+        
