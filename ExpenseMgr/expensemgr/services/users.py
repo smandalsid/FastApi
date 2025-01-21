@@ -19,8 +19,10 @@ class UserService:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Phone number already exists")
         if self.db.query(User).filter(User.email == create_user.email).first():
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists")
+        if create_user.password!=create_user.retyped_password:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password and retyped password do not match")
         
-        # if self.db.query(User).filter
+        
         create_user_model = User(
             email = create_user.email,
             first_name = create_user.first_name,

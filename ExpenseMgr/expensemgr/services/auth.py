@@ -1,5 +1,6 @@
 from datetime import timedelta, datetime, timezone
-from fastapi import Depends, status, HTTPException, Request
+from fastapi import Depends, status, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import jwt
 from typing import Annotated
 
@@ -7,7 +8,7 @@ from ..database.models.users import User
 from ..database.db import db_dependency
 from .utils import SECRET_KEY, ALGORITHM
 
-from .utils import bcrypt_context, oath2_bearer
+from .utils import bcrypt_context
 
 class AuthService:
 
@@ -28,9 +29,9 @@ class AuthService:
         encode.update({'exp': expires})
         return jwt.encode(encode, SECRET_KEY, algorithm = ALGORITHM)
 
-    async def get_current_user(self, token: Annotated[str, Depends(oath2_bearer)]):
+    async def get_current_user(token: Annotated[HTTPAuthorizationCredentials, Depends(HTTPBearer())]):
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            payload = jwt.decode(token.credentials, SECRET_KEY, algorithms=[ALGORITHM])
             username: str = payload.get('sub')
             user_id: int = payload.get('id')
             is_admin: str = payload.get('is_admin')
@@ -39,5 +40,6 @@ class AuthService:
             else:
                 return {'username': username, 'id': user_id, 'is_admin': is_admin}
         except:
+            print("hello")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
         
