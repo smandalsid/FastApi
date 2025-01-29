@@ -15,7 +15,7 @@ class AuthService:
     def __init__(self, db: db_dependency):
         self.db = db
 
-    def authenticate_user(self, username: str, password: str):
+    def authenticate_user(self, username: str, password: str) -> User:
         user = self.db.query(User).filter(User.username == username).first()
         if not user:
             return False
